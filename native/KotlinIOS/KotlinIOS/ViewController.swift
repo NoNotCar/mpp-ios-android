@@ -35,20 +35,25 @@ class ViewController: UIViewController,UIPickerViewDataSource,UIPickerViewDelega
     var arrivalStations = [String]()
 
     //Table variables
-
     
-    private var tableContents:Array<String>=[]
+    private var departureContents:Array<String>=[]
+    private var arrivalContents:Array<String>=[]
+    private var costContents:Array<Int>=[]
     private let tableID="potato"
     private let presenter: ApplicationContractPresenter = ApplicationPresenter()
+    private let reUseIdentifier = "CustomCell"
     
     //On load
     
     override func viewDidLoad() {
         super.viewDidLoad()
         presenter.onViewTaken(view: self)
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: tableID)
-        createPickers()
+        let customTableCellNib = UINib(nibName: "CustomCell", bundle: nil)
+        tableView.register(customTableCellNib, forCellReuseIdentifier: reUseIdentifier)
+        tableView.tableFooterView = UIView(frame: .zero)
+        //TODO: Create a seperate setuptable function
         
+        createPickers()
     }
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -81,33 +86,38 @@ extension ViewController: ApplicationContractView {
     func setLabel(text: String) {
         label.text = text
     }
-}
-extension ViewController: UITableViewDataSource,UITableViewDelegate{
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableContents.count
-    }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell=tableView.dequeueReusableCell(withIdentifier: tableID)!
-        cell.textLabel?.text=tableContents[indexPath.row]
-        return cell
-    }
     func showData(data: [ApplicationContractTrainJourney]) {
-        tableContents.removeAll()
+        departureContents.removeAll()
+        arrivalContents.removeAll()
+        costContents.removeAll()
         if data.count==0 {
-            tableContents.append("No tickets found :(")
+            departureContents.append("No tickets found :(")
+            //TODO: Pop up
         }else{
             for journey in data{
-                let currencyFormatter = NumberFormatter()
-                currencyFormatter.usesGroupingSeparator = true
-                currencyFormatter.numberStyle = .currency
-                currencyFormatter.locale = Locale.init(identifier: "en_GB")
-                let priceString = currencyFormatter.string(from: NSNumber(value: Double(journey.cost)/100.0))!
-                tableContents.append(journey.departureTime+", "+journey.arrivalTime+" : "+priceString)
+                departureContents.append(journey.departureTime)
+                arrivalContents.append(journey.arrivalTime)
+                costContents.append(Int(journey.cost))
             }
         }
         tableView.reloadData()
     }
+}
+extension ViewController: UITableViewDataSource, UITableViewDelegate{
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return departureContents.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: reUseIdentifier) as! CustomCell
+        
+        cell.departureSet(message: departureContents[indexPath.row])
+        cell.arrivalSet(message: arrivalContents[indexPath.row])
+        cell.costSet(message: costContents[indexPath.row])
+        return cell
+    }
+
     
 }
 
