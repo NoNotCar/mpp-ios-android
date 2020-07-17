@@ -161,7 +161,7 @@ class  ResultsTableAdapter: RecyclerView.Adapter<ResultsTableAdapter.MyViewHolde
             itemView.resultsTableCellArrive.text = arriveTime
             itemView.resultsTableCellChanges.text = trainChanges
             itemView.resultsTableCellCost.text = price
-            itemView.myButton.setOnClickListener {
+            itemView.seeMoreButton.setOnClickListener {
                 onButtonClick()
             }
         }
